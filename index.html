@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KUBAWAR - การค้าขายอวกาศ</title>
+    <style>
+        body { font-family: Arial; background: #000; color: #fff; padding: 20px; text-align: center; }
+        button { background: #4CAF50; color: white; padding: 10px; margin: 5px; border: none; cursor: pointer; }
+        button:hover { background: #45a049; }
+        #status { margin: 20px; font-size: 18px; }
+        table { margin: 20px auto; border-collapse: collapse; }
+        th, td { border: 1px solid #fff; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🚀 KUBAWAR</h1>
+    <p>คุณคือพ่อค้าอวกาศ! ซื้อถูก ขายแพง รวยให้ได้ 10,000 บาท</p>
+    
+    <div id="status">
+        <p>💰 เงิน: <span id="money">1000</span> บาท</p>
+        <p>📅 วันที่: <span id="day">1</span></p>
+        <p>📍 ดาว: <span id="location">地球</span></p>
+    </div>
+    
+    <h3>🛒 ราคาสินค้า</h3>
+    <table id="prices">
+        <tr><th>สินค้า</th><th>ราคา</th></tr>
+    </table>
+    
+    <h3>🎒 สินค้าในยาน</h3>
+    <div id="cargo"></div>
+    
+    <button onclick="travel()">🚀 เดินทาง (ใช้ 1 วัน)</button>
+    <br><br>
+    <button onclick="buySell('buy')">🛒 ซื้อทั้งหมด</button>
+    <button onclick="buySell('sell')">💰 ขายทั้งหมด</button>
+    
+    <script>
+        let money = 1000;
+        let day = 1;
+        let location = '地球';
+        let cargo = {};
+        const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
+        let prices = {};
+
+        function init() {
+            updatePrices();
+            updateDisplay();
+        }
+
+        function updatePrices() {
+            prices = {};
+            goods.forEach(g => {
+                prices[g] = Math.floor(Math.random() * 250) + 50;
+            });
+        }
+
+        function updateDisplay() {
+            document.getElementById('money').textContent = money;
+            document.getElementById('day').textContent = day;
+            document.getElementById('location').textContent = location;
+
+            let table = '<tr><th>สินค้า</th><th>ราคา</th></tr>';
+            goods.forEach(g => {
+                table += `<tr><td>${g}</td><td>${prices[g]} บาท</td></tr>`;
+            });
+            document.getElementById('prices').innerHTML = table;
+
+            let cargoDiv = '';
+            let totalCargo = 0;
+            for (let item in cargo) {
+                if (cargo[item] > 0) {
+                    cargoDiv += `<p>${item}: ${cargo[item]} ชิ้น</p>`;
+                    totalCargo += cargo[item];
+                }
+            }
+            if (totalCargo === 0) cargoDiv = '<p>ไม่มีสินค้า</p>';
+            document.getElementById('cargo').innerHTML = cargoDiv;
+
+            if (money >= 10000) {
+                alert('🎉 คุณชนะ! รวยแล้ว!');
+                location.reload();
+            } else if (day > 30) {
+                alert('⏰ หมดเวลา! ลองใหม่');
+                location.reload();
+            }
+        }
+
+        function travel() {
+            day++;
+            location = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'][Math.floor(Math.random() * 4)];
+            updatePrices();
+            updateDisplay();
+        }
+
+        function buySell(action) {
+            goods.forEach(g => {
+                if (action === 'buy') {
+                    let qty = 10;
+                    let cost = prices[g] * qty;
+                    if (money >= cost) {
+                        money -= cost;
+                        cargo[g] = (cargo[g] || 0) + qty;
+                    }
+                } else if (action === 'sell' && cargo[g]) {
+                    let qty = Math.min(10, cargo[g]);
+                    let revenue = prices[g] * qty * 0.8;
+                    money += revenue;
+                    cargo[g] -= qty;
+                    if (cargo[g] <= 0) delete cargo[g];
+                }
+            });
+            updateDisplay();
+        }
+
+        init();
+    </script>
+</body>
+</html>เพิ่ม index.html สำหรับ GitHub Pages
