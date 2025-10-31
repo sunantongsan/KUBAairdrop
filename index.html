@@ -6,8 +6,8 @@
     <title>KUBAWAR</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <style>
-        body { margin: 0; padding: 0; background: #000; }
-        canvas { display: block; margin: 0 auto; }
+        body { margin: 0; background: #000; display: flex; justify-content: center; }
+        canvas { image-rendering: pixelated; }
     </style>
 </head>
 <body>
@@ -16,24 +16,29 @@
         type: Phaser.AUTO,
         width: 400,
         height: 600,
-        parent: 'game',
+        backgroundColor: '#000033',
         scene: { preload, create, update }
     };
 
     let game, money = 1000, day = 1, location = '地球', cargo = {}, prices = {}, scene;
     const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
+    const planets = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'];
 
     function preload() {
-        this.load.image('bg', 'https://i.imgur.com/5f7y5fK.jpg'); // พื้นหลังอวกาศ
-        this.load.image('ship', 'https://i.imgur.com/5f7y5fK.jpg'); // ยาน
-        this.load.image('planet1', 'https://i.imgur.com/5f7y5fK.jpg');
+        this.load.image('bg', 'https://i.imgur.com/8k5k4wZ.jpg'); // พื้นหลังอวกาศ
+        this.load.image('ship', 'https://i.imgur.com/0t1v5uS.png'); // ยาน
+        this.load.image('earth', 'https://i.imgur.com/5f7y5fK.jpg');
+        this.load.image('mars', 'https://i.imgur.com/5f7y5fK.jpg');
+        this.load.image('venus', 'https://i.imgur.com/5f7y5fK.jpg');
+        this.load.image('saturn', 'https://i.imgur.com/5f7y5fK.jpg');
     }
 
     function create() {
         scene = this;
-        this.add.image(200, 300, 'bg').setScale(2);
-        this.add.text(20, 20, 'KUBAWAR', { fontSize: '32px', color: '#fff' }).setDepth(1);
-        
+        this.add.image(200, 300, 'bg').setScale(1.5);
+
+        this.add.text(100, 20, 'KUBAWAR', { fontSize: '36px', color: '#00ff00', fontStyle: 'bold' }).setOrigin(0.5);
+
         updatePrices();
         updateUI();
     }
@@ -46,45 +51,45 @@
     }
 
     function updateUI() {
-        // ลบ UI เก่า
         scene.children.list.filter(c => c.type === 'Text' && c.depth === 0).forEach(t => t.destroy());
+        scene.children.list.filter(c => c.type === 'Image' && c.name === 'planet').forEach(p => p.destroy());
 
         let y = 80;
-        scene.add.text(20, y, `💰 เงิน: ${money} บาท`, { fontSize: '20px', color: '#0f0' }).setDepth(0); y += 30;
-        scene.add.text(20, y, `📅 วันที่: ${day}`, { fontSize: '20px', color: '#ff0' }).setDepth(0); y += 30;
-        scene.add.text(20, y, `📍 ดาว: ${location}`, { fontSize: '20px', color: '#0ff' }).setDepth(0); y += 50;
+        scene.add.text(20, y, `💰 เงิน: ${money} บาท`, { fontSize: '20px', color: '#00ff00' }).setDepth(0); y += 35;
+        scene.add.text(20, y, `📅 วันที่: ${day}`, { fontSize: '20px', color: '#ffff00' }).setDepth(0); y += 35;
+        scene.add.text(20, y, `📍 ดาว: ${location}`, { fontSize: '20px', color: '#00ffff' }).setDepth(0); y += 50;
 
-        scene.add.text(20, y, '🛒 ราคา', { fontSize: '18px', color: '#fff' }).setDepth(0); y += 25;
+        scene.add.text(20, y, '🛒 ราคาสินค้า', { fontSize: '18px', color: '#ffffff' }).setDepth(0); y += 30;
         goods.forEach(g => {
-            scene.add.text(30, y, `${g}: ${prices[g]} บาท`, { fontSize: '16px', color: '#ccc' }).setDepth(0); y += 25;
+            scene.add.text(30, y, `• ${g}: ${prices[g]} บาท`, { fontSize: '16px', color: '#cccccc' }).setDepth(0); y += 25;
         });
 
         y += 20;
-        scene.add.text(20, y, '🎒 ในยาน', { fontSize: '18px', color: '#fff' }).setDepth(0); y += 25;
+        scene.add.text(20, y, '🎒 ในยาน', { fontSize: '18px', color: '#ffffff' }).setDepth(0); y += 30;
         let total = 0;
         for (let item in cargo) {
             if (cargo[item] > 0) {
-                scene.add.text(30, y, `${item}: ${cargo[item]} ชิ้น`, { fontSize: '16px', color: '#0f0' }).setDepth(0); y += 20;
+                scene.add.text(30, y, `• ${item}: ${cargo[item]} ชิ้น`, { fontSize: '16px', color: '#00ff00' }).setDepth(0); y += 20;
                 total += cargo[item];
             }
         }
-        if (total === 0) scene.add.text(30, y, 'ว่างเปล่า', { fontSize: '16px', color: '#666' }).setDepth(0);
+        if (total === 0) scene.add.text(30, y, 'ว่างเปล่า', { fontSize: '16px', color: '#666666' }).setDepth(0);
 
         // ปุ่ม
         const btnY = 520;
-        const travelBtn = scene.add.text(50, btnY, '🚀 เดินทาง', { fontSize: '18px', backgroundColor: '#4CAF50', padding: { x: 10, y: 5 } }).setInteractive();
+        const travelBtn = scene.add.text(40, btnY, '🚀 เดินทาง', { fontSize: '18px', backgroundColor: '#4CAF50', padding: { x: 15, y: 8 }, color: '#fff' }).setInteractive().setDepth(0);
         travelBtn.on('pointerdown', travel);
 
-        const buyBtn = scene.add.text(180, btnY, '🛒 ซื้อ', { fontSize: '18px', backgroundColor: '#2196F3', padding: { x: 10, y: 5 } }).setInteractive();
+        const buyBtn = scene.add.text(160, btnY, '🛒 ซื้อ', { fontSize: '18px', backgroundColor: '#2196F3', padding: { x: 15, y: 8 }, color: '#fff' }).setInteractive().setDepth(0);
         buyBtn.on('pointerdown', () => buySell('buy'));
 
-        const sellBtn = scene.add.text(280, btnY, '💰 ขาย', { fontSize: '18px', backgroundColor: '#f44336', padding: { x: 10, y: 5 } }).setInteractive();
+        const sellBtn = scene.add.text(260, btnY, '💰 ขาย', { fontSize: '18px', backgroundColor: '#f44336', padding: { x: 15, y: 8 }, color: '#fff' }).setInteractive().setDepth(0);
         sellBtn.on('pointerdown', () => buySell('sell'));
     }
 
     function travel() {
         day++;
-        location = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'][Math.floor(Math.random() * 4)];
+        location = planets[Math.floor(Math.random() * planets.length)];
         updatePrices();
         updateUI();
         checkWin();
@@ -100,7 +105,7 @@
                 }
             } else if (action === 'sell' && cargo[g]) {
                 let qty = Math.min(10, cargo[g]);
-                let revenue = prices[g] * qty * 0.8;
+                let revenue = Math.floor(prices[g] * qty * 0.8);
                 money += revenue;
                 cargo[g] -= qty;
                 if (cargo[g] <= 0) delete cargo[g];
@@ -112,10 +117,10 @@
 
     function checkWin() {
         if (money >= 10000) {
-            alert('🎉 คุณชนะ! รวยแล้ว!');
+            alert('🎉 คุณชนะ! รวย 10,000 บาทแล้ว!');
             location.reload();
         } else if (day > 30) {
-            alert('⏰ หมดเวลา!');
+            alert('⏰ หมดเวลา 30 วันแล้ว!');
             location.reload();
         }
     }
@@ -123,4 +128,4 @@
     game = new Phaser.Game(config);
 </script>
 </body>
-</html>อัปเดตหน้าเกมใหม่
+</html>
