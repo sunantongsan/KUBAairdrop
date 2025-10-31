@@ -35,23 +35,24 @@
         th, td { border: 1px solid #00ff00; padding: 10px; color: #00ff00; }
         th { background: #000033; }
         #cargo { background: rgba(0,255,0,0.1); padding: 10px; border-radius: 5px; margin: 20px; }
-        input { padding: 10px; font-size: 16px; margin: 10px; border-radius: 5px; }
+        input { padding: 10px; font-size: 16px; margin: 10px; border-radius: 5px; width: 80%; max-width: 300px; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <h1>🚀 KUBAWAR</h1>
-    <p>ซื้อถูก ขายแพง รวยให้ได้ 10,000 บาทใน 30 วัน!</p>
-    
-    <div id="setup" style="display:block;">
+
+    <!-- หน้าเริ่มเกม -->
+    <div id="setup">
         <h2>🎉 ยินดีต้อนรับผู้เล่นใหม่!</h2>
         <p>คุณได้รับ <strong>ดาว 1 ดวง</strong> เป็นของตัวเอง!</p>
         <p>ตั้งชื่อดาวของคุณ:</p>
-        <input type="text" id="planetName" placeholder="เช่น ดาวแดงของฉัน" maxlength="20">
+        <input type="text" id="planetName" placeholder="เช่น ดาวรวยของฉัน" maxlength="20">
         <br><br>
         <button onclick="startGame()">🚀 เริ่มเกม!</button>
     </div>
 
-    <div id="game" style="display:none;">
+    <!-- หน้าเกมหลัก -->
+    <div id="game" class="hidden">
         <div id="status">
             <p>💰 เงิน: <span id="money">1000</span> บาท</p>
             <p>📅 วันที่: <span id="day">1</span></p>
@@ -77,15 +78,46 @@
         const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
         const planetTypes = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'];
 
+        // ตรวจสอบว่าผู้เล่นเคยเล่นไหม
+        window.onload = function() {
+            const saved = localStorage.getItem('kubawar_save');
+            if (saved) {
+                loadGame(JSON.parse(saved));
+                document.getElementById('setup').classList.add('hidden');
+                document.getElementById('game').classList.remove('hidden');
+            }
+        };
+
         function startGame() {
             homeName = document.getElementById('planetName').value.trim() || 'ดาวบ้าน';
             homePlanet = planetTypes[Math.floor(Math.random() * planetTypes.length)];
             location = homePlanet;
-            
-            document.getElementById('setup').style.display = 'none';
-            document.getElementById('game').style.display = 'block';
+
+            // บันทึกเกม
+            saveGame();
+
+            // ซ่อนหน้าเริ่ม + แสดงเกม
+            document.getElementById('setup').classList.add('hidden');
+            document.getElementById('game').classList.remove('hidden');
             document.getElementById('homePlanet').textContent = `${homeName} (${homePlanet})`;
-            
+
+            updatePrices();
+            updateDisplay();
+        }
+
+        function saveGame() {
+            const save = { money, day, location, cargo, homePlanet, homeName };
+            localStorage.setItem('kubawar_save', JSON.stringify(save));
+        }
+
+        function loadGame(save) {
+            money = save.money;
+            day = save.day;
+            location = save.location;
+            cargo = save.cargo || {};
+            homePlanet = save.homePlanet;
+            homeName = save.homeName;
+            document.getElementById('homePlanet').textContent = `${homeName} (${homePlanet})`;
             updatePrices();
             updateDisplay();
         }
@@ -109,6 +141,7 @@
             document.getElementById('cargo').innerHTML = total === 0 ? '<p>ไม่มีสินค้า</p>' : cargoDiv;
 
             checkWin();
+            saveGame(); // บันทึกทุกครั้งที่อัปเดต
         }
 
         function travel() {
@@ -134,7 +167,7 @@
                 } else if (action === 'sell' && cargo[g]) {
                     let qty = Math.min(10, cargo[g]);
                     let revenue = Math.floor(prices[g] * qty * 0.8);
-                    money += revenue; cargo[g] -= qty; if (cargo[g] <= 0) delete cargo[g]; changed = true;
+                    money += revenue; cargo[g] -= qty; if (cargo[g] <= 0) delete cargo[g];ល changed = true;
                 }
             });
             if (changed) updateDisplay();
