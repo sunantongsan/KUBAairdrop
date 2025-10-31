@@ -18,7 +18,7 @@
             background: #4CAF50; 
             color: white; 
             padding: 12px 20px; 
-            margin: 10px; 
+            margin: 8px; 
             border: none; 
             border-radius: 5px; 
             cursor: pointer; 
@@ -26,75 +26,73 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
         button:hover { background: #45a049; transform: scale(1.05); }
-        #status { 
-            margin: 20px; 
-            font-size: 18px; 
-            background: rgba(255,255,255,0.1); 
-            padding: 15px; 
-            border-radius: 10px;
-        }
-        table { 
-            margin: 20px auto; 
-            border-collapse: collapse; 
-            background: rgba(255,255,255,0.05);
-        }
-        th, td { 
-            border: 1px solid #00ff00; 
-            padding: 10px; 
-            color: #00ff00;
-        }
+        .select-btn { background: #2196F3; }
+        .home-btn { background: #FF9800; }
+        .select-btn:hover { background: #1976D2; }
+        .home-btn:hover { background: #F57C00; }
+        #status { margin: 20px; font-size: 18px; background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; }
+        table { margin: 20px auto; border-collapse: collapse; background: rgba(255,255,255,0.05); }
+        th, td { border: 1px solid #00ff00; padding: 10px; color: #00ff00; }
         th { background: #000033; }
-        #cargo { 
-            background: rgba(0,255,0,0.1); 
-            padding: 10px; 
-            border-radius: 5px; 
-            margin: 20px;
-        }
-        .win { color: #ffd700; font-size: 24px; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        #cargo { background: rgba(0,255,0,0.1); padding: 10px; border-radius: 5px; margin: 20px; }
+        input { padding: 10px; font-size: 16px; margin: 10px; border-radius: 5px; }
     </style>
 </head>
 <body>
     <h1>🚀 KUBAWAR</h1>
-    <p>คุณคือพ่อค้าอวกาศ! ซื้อถูก ขายแพง รวยให้ได้ 10,000 บาทใน 30 วัน</p>
+    <p>ซื้อถูก ขายแพง รวยให้ได้ 10,000 บาทใน 30 วัน!</p>
     
-    <div id="status">
-        <p>💰 เงิน: <span id="money">1000</span> บาท</p>
-        <p>📅 วันที่: <span id="day">1</span></p>
-        <p>📍 ดาว: <span id="location">地球</span></p>
+    <div id="setup" style="display:block;">
+        <h2>🎉 ยินดีต้อนรับผู้เล่นใหม่!</h2>
+        <p>คุณได้รับ <strong>ดาว 1 ดวง</strong> เป็นของตัวเอง!</p>
+        <p>ตั้งชื่อดาวของคุณ:</p>
+        <input type="text" id="planetName" placeholder="เช่น ดาวแดงของฉัน" maxlength="20">
+        <br><br>
+        <button onclick="startGame()">🚀 เริ่มเกม!</button>
+    </div>
+
+    <div id="game" style="display:none;">
+        <div id="status">
+            <p>💰 เงิน: <span id="money">1000</span> บาท</p>
+            <p>📅 วันที่: <span id="day">1</span></p>
+            <p>📍 ดาว: <span id="location">กำลังโหลด...</span></p>
+            <p>🏠 ดาวบ้าน: <span id="homePlanet">ยังไม่มี</span></p>
+        </div>
+        
+        <h3>🛒 ราคาสินค้า</h3>
+        <table id="prices"></table>
+        
+        <h3>🎒 สินค้าในยาน</h3>
+        <div id="cargo">ไม่มีสินค้า</div>
+        
+        <button onclick="travel()">🚀 เดินทางสุ่ม (ใช้ 1 วัน)</button>
+        <button onclick="goHome()" class="home-btn">🏠 กลับดาวบ้าน (ฟรี!)</button>
+        <br><br>
+        <button onclick="buySell('buy')">🛒 ซื้อทั้งหมด (x10)</button>
+        <button onclick="buySell('sell')">💰 ขายทั้งหมด (x10)</button>
     </div>
     
-    <h3>🛒 ราคาสินค้า</h3>
-    <table id="prices">
-        <tr><th>สินค้า</th><th>ราคา</th></tr>
-    </table>
-    
-    <h3>🎒 สินค้าในยาน</h3>
-    <div id="cargo">ไม่มีสินค้า</div>
-    
-    <button onclick="travel()">🚀 เดินทางไปดาวอื่น (ใช้ 1 วัน)</button>
-    <br><br>
-    <button onclick="buySell('buy')">🛒 ซื้อสินค้าทั้งหมด (x10 ชิ้น)</button>
-    <button onclick="buySell('sell')">💰 ขายสินค้าทั้งหมด (x10 ชิ้น)</button>
-    
     <script>
-        let money = 1000;
-        let day = 1;
-        let location = '地球';
-        let cargo = {};
+        let money = 1000, day = 1, location = '', cargo = {}, prices = {}, homePlanet = '', homeName = '';
         const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
-        let prices = {};
+        const planetTypes = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'];
 
-        function init() {
+        function startGame() {
+            homeName = document.getElementById('planetName').value.trim() || 'ดาวบ้าน';
+            homePlanet = planetTypes[Math.floor(Math.random() * planetTypes.length)];
+            location = homePlanet;
+            
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('game').style.display = 'block';
+            document.getElementById('homePlanet').textContent = `${homeName} (${homePlanet})`;
+            
             updatePrices();
             updateDisplay();
         }
 
         function updatePrices() {
             prices = {};
-            goods.forEach(g => {
-                prices[g] = Math.floor(Math.random() * 250) + 50;
-            });
+            goods.forEach(g => prices[g] = Math.floor(Math.random() * 250) + 50);
         }
 
         function updateDisplay() {
@@ -103,28 +101,26 @@
             document.getElementById('location').textContent = location;
 
             let table = '<tr><th>สินค้า</th><th>ราคา</th></tr>';
-            goods.forEach(g => {
-                table += `<tr><td>${g}</td><td>${prices[g]} บาท</td></tr>`;
-            });
+            goods.forEach(g => table += `<tr><td>${g}</td><td>${prices[g]} บาท</td></tr>`);
             document.getElementById('prices').innerHTML = table;
 
-            let cargoDiv = '';
-            let totalCargo = 0;
-            for (let item in cargo) {
-                if (cargo[item] > 0) {
-                    cargoDiv += `<p>• ${item}: ${cargo[item]} ชิ้น</p>`;
-                    totalCargo += cargo[item];
-                }
-            }
-            if (totalCargo === 0) cargoDiv = '<p>ไม่มีสินค้า</p>';
-            document.getElementById('cargo').innerHTML = cargoDiv;
+            let cargoDiv = '', total = 0;
+            for (let item in cargo) if (cargo[item] > 0) { cargoDiv += `<p>• ${item}: ${cargo[item]} ชิ้น</p>`; total += cargo[item]; }
+            document.getElementById('cargo').innerHTML = total === 0 ? '<p>ไม่มีสินค้า</p>' : cargoDiv;
 
             checkWin();
         }
 
         function travel() {
             day++;
-            location = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'][Math.floor(Math.random() * 4)];
+            const available = planetTypes.filter(p => p !== location);
+            location = available[Math.floor(Math.random() * available.length)];
+            updatePrices();
+            updateDisplay();
+        }
+
+        function goHome() {
+            location = homePlanet;
             updatePrices();
             updateDisplay();
         }
@@ -133,20 +129,12 @@
             let changed = false;
             goods.forEach(g => {
                 if (action === 'buy') {
-                    let qty = 10;
-                    let cost = prices[g] * qty;
-                    if (money >= cost) {
-                        money -= cost;
-                        cargo[g] = (cargo[g] || 0) + qty;
-                        changed = true;
-                    }
+                    let cost = prices[g] * 10;
+                    if (money >= cost) { money -= cost; cargo[g] = (cargo[g] || 0) + 10; changed = true; }
                 } else if (action === 'sell' && cargo[g]) {
                     let qty = Math.min(10, cargo[g]);
-                    let revenue = Math.floor(prices[g] * qty * 0.8); // ขายถูก 20%
-                    money += revenue;
-                    cargo[g] -= qty;
-                    if (cargo[g] <= 0) delete cargo[g];
-                    changed = true;
+                    let revenue = Math.floor(prices[g] * qty * 0.8);
+                    money += revenue; cargo[g] -= qty; if (cargo[g] <= 0) delete cargo[g]; changed = true;
                 }
             });
             if (changed) updateDisplay();
@@ -154,15 +142,13 @@
 
         function checkWin() {
             if (money >= 10000) {
-                document.getElementById('status').innerHTML += '<p class="win">🎉 คุณชนะ! รวยแล้ว! 🎉</p>';
+                document.getElementById('status').innerHTML += '<p style="color:gold;font-size:24px;">🎉 คุณชนะ! รวยแล้ว!</p>';
                 setTimeout(() => location.reload(), 3000);
             } else if (day > 30) {
-                document.getElementById('status').innerHTML += '<p style="color: red;">⏰ หมดเวลา! ลองใหม่</p>';
+                document.getElementById('status').innerHTML += '<p style="color:red;">⏰ หมดเวลา!</p>';
                 setTimeout(() => location.reload(), 3000);
             }
         }
-
-        init();
     </script>
 </body>
 </html>
