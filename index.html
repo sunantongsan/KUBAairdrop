@@ -37,6 +37,7 @@
         #cargo { background: rgba(0,255,0,0.1); padding: 10px; border-radius: 5px; margin: 20px; }
         input { padding: 10px; font-size: 16px; margin: 10px; border-radius: 5px; width: 80%; max-width: 300px; }
         .hidden { display: none !important; }
+        #error { color: red; font-size: 18px; }
     </style>
 </head>
 <body>
@@ -49,6 +50,7 @@
         <input type="text" id="planetName" placeholder="เช่น ดาวรวยของฉัน" maxlength="20">
         <br><br>
         <button onclick="startGame()">🚀 เริ่มเกม!</button>
+        <div id="error" style="display:none;">กรุณาใส่ชื่อดาวแล้วลองใหม่!</div>
     </div>
 
     <!-- หน้าเกมหลัก -->
@@ -71,6 +73,7 @@
         <br><br>
         <button onclick="buySell('buy')">🛒 ซื้อทั้งหมด (x10)</button>
         <button onclick="buySell('sell')">💰 ขายทั้งหมด (x10)</button>
+        <button onclick="resetGame()" style="background:#f44336;">🔄 เริ่มใหม่</button>
     </div>
     
     <script>
@@ -78,22 +81,14 @@
         const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
         const planetTypes = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'];
 
-        // โหลดเซฟเก่า
-        window.onload = function() {
-            const saved = localStorage.getItem('kubawar_save');
-            if (saved) {
-                loadGame(JSON.parse(saved));
-                document.getElementById('setup').classList.add('hidden');
-                document.getElementById('game').classList.remove('hidden');
-            }
-        };
-
         function startGame() {
-            homeName = document.getElementById('planetName').value.trim() || 'ดาวบ้าน';
+            homeName = document.getElementById('planetName').value.trim();
+            if (!homeName) {
+                document.getElementById('error').style.display = 'block';
+                return;
+            }
             homePlanet = planetTypes[Math.floor(Math.random() * planetTypes.length)];
             location = homePlanet;
-
-            saveGame();
 
             document.getElementById('setup').classList.add('hidden');
             document.getElementById('game').classList.remove('hidden');
@@ -103,21 +98,10 @@
             updateDisplay();
         }
 
-        function saveGame() {
-            const save = { money, day, location, cargo, homePlanet, homeName };
-            localStorage.setItem('kubawar_save', JSON.stringify(save));
-        }
-
-        function loadGame(save) {
-            money = save.money;
-            day = save.day;
-            location = save.location;
-            cargo = save.cargo || {};
-            homePlanet = save.homePlanet;
-            homeName = save.homeName;
-            document.getElementById('homePlanet').textContent = `${homeName} (${homePlanet})`;
-            updatePrices();
-            updateDisplay();
+        function resetGame() {
+            if (confirm('เริ่มเกมใหม่? ข้อมูลจะหาย!')) {
+                location.reload();
+            }
         }
 
         function updatePrices() {
@@ -139,7 +123,6 @@
             document.getElementById('cargo').innerHTML = total === 0 ? '<p>ไม่มีสินค้า</p>' : cargoDiv;
 
             checkWin();
-            saveGame();
         }
 
         function travel() {
