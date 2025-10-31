@@ -78,7 +78,7 @@
         const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
         const planetTypes = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'];
 
-        // ตรวจสอบว่าผู้เล่นเคยเล่นไหม
+        // โหลดเซฟเก่า
         window.onload = function() {
             const saved = localStorage.getItem('kubawar_save');
             if (saved) {
@@ -93,10 +93,8 @@
             homePlanet = planetTypes[Math.floor(Math.random() * planetTypes.length)];
             location = homePlanet;
 
-            // บันทึกเกม
             saveGame();
 
-            // ซ่อนหน้าเริ่ม + แสดงเกม
             document.getElementById('setup').classList.add('hidden');
             document.getElementById('game').classList.remove('hidden');
             document.getElementById('homePlanet').textContent = `${homeName} (${homePlanet})`;
@@ -141,7 +139,7 @@
             document.getElementById('cargo').innerHTML = total === 0 ? '<p>ไม่มีสินค้า</p>' : cargoDiv;
 
             checkWin();
-            saveGame(); // บันทึกทุกครั้งที่อัปเดต
+            saveGame();
         }
 
         function travel() {
@@ -167,7 +165,7 @@
                 } else if (action === 'sell' && cargo[g]) {
                     let qty = Math.min(10, cargo[g]);
                     let revenue = Math.floor(prices[g] * qty * 0.8);
-                    money += revenue; cargo[g] -= qty; if (cargo[g] <= 0) delete cargo[g];ល changed = true;
+                    money += revenue; cargo[g] -= qty; if (cargo[g] <= 0) delete cargo[g]; changed = true;
                 }
             });
             if (changed) updateDisplay();
