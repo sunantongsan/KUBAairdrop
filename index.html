@@ -3,129 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KUBAWAR</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <title>KUBAWAR - การค้าขายอวกาศ</title>
     <style>
-        body { margin: 0; background: #000; display: flex; justify-content: center; }
-        canvas { image-rendering: pixelated; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(to bottom, #000033, #000000); 
+            color: #fff; 
+            padding: 20px; 
+            text-align: center; 
+            margin: 0;
+        }
+        h1 { color: #00ff00; text-shadow: 0 0 10px #00ff00; }
+        button { 
+            background: #4CAF50; 
+            color: white; 
+            padding: 12px 20px; 
+            margin: 10px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        button:hover { background: #45a049; transform: scale(1.05); }
+        #status { 
+            margin: 20px; 
+            font-size: 18px; 
+            background: rgba(255,255,255,0.1); 
+            padding: 15px; 
+            border-radius: 10px;
+        }
+        table { 
+            margin: 20px auto; 
+            border-collapse: collapse; 
+            background: rgba(255,255,255,0.05);
+        }
+        th, td { 
+            border: 1px solid #00ff00; 
+            padding: 10px; 
+            color: #00ff00;
+        }
+        th { background: #000033; }
+        #cargo { 
+            background: rgba(0,255,0,0.1); 
+            padding: 10px; 
+            border-radius: 5px; 
+            margin: 20px;
+        }
+        .win { color: #ffd700; font-size: 24px; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-<script>
-    const config = {
-        type: Phaser.AUTO,
-        width: 400,
-        height: 600,
-        backgroundColor: '#000033',
-        scene: { preload, create, update }
-    };
+    <h1>🚀 KUBAWAR</h1>
+    <p>คุณคือพ่อค้าอวกาศ! ซื้อถูก ขายแพง รวยให้ได้ 10,000 บาทใน 30 วัน</p>
+    
+    <div id="status">
+        <p>💰 เงิน: <span id="money">1000</span> บาท</p>
+        <p>📅 วันที่: <span id="day">1</span></p>
+        <p>📍 ดาว: <span id="location">地球</span></p>
+    </div>
+    
+    <h3>🛒 ราคาสินค้า</h3>
+    <table id="prices">
+        <tr><th>สินค้า</th><th>ราคา</th></tr>
+    </table>
+    
+    <h3>🎒 สินค้าในยาน</h3>
+    <div id="cargo">ไม่มีสินค้า</div>
+    
+    <button onclick="travel()">🚀 เดินทางไปดาวอื่น (ใช้ 1 วัน)</button>
+    <br><br>
+    <button onclick="buySell('buy')">🛒 ซื้อสินค้าทั้งหมด (x10 ชิ้น)</button>
+    <button onclick="buySell('sell')">💰 ขายสินค้าทั้งหมด (x10 ชิ้น)</button>
+    
+    <script>
+        let money = 1000;
+        let day = 1;
+        let location = '地球';
+        let cargo = {};
+        const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
+        let prices = {};
 
-    let game, money = 1000, day = 1, location = '地球', cargo = {}, prices = {}, scene;
-    const goods = ['น้ำมันดาวอังคาร', 'ผลไม้ดาวพุธ', 'เครื่องประดับดาวเสาร์'];
-    const planets = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'];
-
-    function preload() {
-        this.load.image('bg', 'https://i.imgur.com/8k5k4wZ.jpg'); // พื้นหลังอวกาศ
-        this.load.image('ship', 'https://i.imgur.com/0t1v5uS.png'); // ยาน
-        this.load.image('earth', 'https://i.imgur.com/5f7y5fK.jpg');
-        this.load.image('mars', 'https://i.imgur.com/5f7y5fK.jpg');
-        this.load.image('venus', 'https://i.imgur.com/5f7y5fK.jpg');
-        this.load.image('saturn', 'https://i.imgur.com/5f7y5fK.jpg');
-    }
-
-    function create() {
-        scene = this;
-        this.add.image(200, 300, 'bg').setScale(1.5);
-
-        this.add.text(100, 20, 'KUBAWAR', { fontSize: '36px', color: '#00ff00', fontStyle: 'bold' }).setOrigin(0.5);
-
-        updatePrices();
-        updateUI();
-    }
-
-    function update() {}
-
-    function updatePrices() {
-        prices = {};
-        goods.forEach(g => prices[g] = Math.floor(Math.random() * 250) + 50);
-    }
-
-    function updateUI() {
-        scene.children.list.filter(c => c.type === 'Text' && c.depth === 0).forEach(t => t.destroy());
-        scene.children.list.filter(c => c.type === 'Image' && c.name === 'planet').forEach(p => p.destroy());
-
-        let y = 80;
-        scene.add.text(20, y, `💰 เงิน: ${money} บาท`, { fontSize: '20px', color: '#00ff00' }).setDepth(0); y += 35;
-        scene.add.text(20, y, `📅 วันที่: ${day}`, { fontSize: '20px', color: '#ffff00' }).setDepth(0); y += 35;
-        scene.add.text(20, y, `📍 ดาว: ${location}`, { fontSize: '20px', color: '#00ffff' }).setDepth(0); y += 50;
-
-        scene.add.text(20, y, '🛒 ราคาสินค้า', { fontSize: '18px', color: '#ffffff' }).setDepth(0); y += 30;
-        goods.forEach(g => {
-            scene.add.text(30, y, `• ${g}: ${prices[g]} บาท`, { fontSize: '16px', color: '#cccccc' }).setDepth(0); y += 25;
-        });
-
-        y += 20;
-        scene.add.text(20, y, '🎒 ในยาน', { fontSize: '18px', color: '#ffffff' }).setDepth(0); y += 30;
-        let total = 0;
-        for (let item in cargo) {
-            if (cargo[item] > 0) {
-                scene.add.text(30, y, `• ${item}: ${cargo[item]} ชิ้น`, { fontSize: '16px', color: '#00ff00' }).setDepth(0); y += 20;
-                total += cargo[item];
-            }
+        function init() {
+            updatePrices();
+            updateDisplay();
         }
-        if (total === 0) scene.add.text(30, y, 'ว่างเปล่า', { fontSize: '16px', color: '#666666' }).setDepth(0);
 
-        // ปุ่ม
-        const btnY = 520;
-        const travelBtn = scene.add.text(40, btnY, '🚀 เดินทาง', { fontSize: '18px', backgroundColor: '#4CAF50', padding: { x: 15, y: 8 }, color: '#fff' }).setInteractive().setDepth(0);
-        travelBtn.on('pointerdown', travel);
+        function updatePrices() {
+            prices = {};
+            goods.forEach(g => {
+                prices[g] = Math.floor(Math.random() * 250) + 50;
+            });
+        }
 
-        const buyBtn = scene.add.text(160, btnY, '🛒 ซื้อ', { fontSize: '18px', backgroundColor: '#2196F3', padding: { x: 15, y: 8 }, color: '#fff' }).setInteractive().setDepth(0);
-        buyBtn.on('pointerdown', () => buySell('buy'));
+        function updateDisplay() {
+            document.getElementById('money').textContent = money.toLocaleString();
+            document.getElementById('day').textContent = day;
+            document.getElementById('location').textContent = location;
 
-        const sellBtn = scene.add.text(260, btnY, '💰 ขาย', { fontSize: '18px', backgroundColor: '#f44336', padding: { x: 15, y: 8 }, color: '#fff' }).setInteractive().setDepth(0);
-        sellBtn.on('pointerdown', () => buySell('sell'));
-    }
+            let table = '<tr><th>สินค้า</th><th>ราคา</th></tr>';
+            goods.forEach(g => {
+                table += `<tr><td>${g}</td><td>${prices[g]} บาท</td></tr>`;
+            });
+            document.getElementById('prices').innerHTML = table;
 
-    function travel() {
-        day++;
-        location = planets[Math.floor(Math.random() * planets.length)];
-        updatePrices();
-        updateUI();
-        checkWin();
-    }
-
-    function buySell(action) {
-        goods.forEach(g => {
-            if (action === 'buy') {
-                let cost = prices[g] * 10;
-                if (money >= cost) {
-                    money -= cost;
-                    cargo[g] = (cargo[g] || 0) + 10;
+            let cargoDiv = '';
+            let totalCargo = 0;
+            for (let item in cargo) {
+                if (cargo[item] > 0) {
+                    cargoDiv += `<p>• ${item}: ${cargo[item]} ชิ้น</p>`;
+                    totalCargo += cargo[item];
                 }
-            } else if (action === 'sell' && cargo[g]) {
-                let qty = Math.min(10, cargo[g]);
-                let revenue = Math.floor(prices[g] * qty * 0.8);
-                money += revenue;
-                cargo[g] -= qty;
-                if (cargo[g] <= 0) delete cargo[g];
             }
-        });
-        updateUI();
-        checkWin();
-    }
+            if (totalCargo === 0) cargoDiv = '<p>ไม่มีสินค้า</p>';
+            document.getElementById('cargo').innerHTML = cargoDiv;
 
-    function checkWin() {
-        if (money >= 10000) {
-            alert('🎉 คุณชนะ! รวย 10,000 บาทแล้ว!');
-            location.reload();
-        } else if (day > 30) {
-            alert('⏰ หมดเวลา 30 วันแล้ว!');
-            location.reload();
+            checkWin();
         }
-    }
 
-    game = new Phaser.Game(config);
-</script>
+        function travel() {
+            day++;
+            location = ['地球', 'ดาวอังคาร', 'ดาวพุธ', 'ดาวเสาร์'][Math.floor(Math.random() * 4)];
+            updatePrices();
+            updateDisplay();
+        }
+
+        function buySell(action) {
+            let changed = false;
+            goods.forEach(g => {
+                if (action === 'buy') {
+                    let qty = 10;
+                    let cost = prices[g] * qty;
+                    if (money >= cost) {
+                        money -= cost;
+                        cargo[g] = (cargo[g] || 0) + qty;
+                        changed = true;
+                    }
+                } else if (action === 'sell' && cargo[g]) {
+                    let qty = Math.min(10, cargo[g]);
+                    let revenue = Math.floor(prices[g] * qty * 0.8); // ขายถูก 20%
+                    money += revenue;
+                    cargo[g] -= qty;
+                    if (cargo[g] <= 0) delete cargo[g];
+                    changed = true;
+                }
+            });
+            if (changed) updateDisplay();
+        }
+
+        function checkWin() {
+            if (money >= 10000) {
+                document.getElementById('status').innerHTML += '<p class="win">🎉 คุณชนะ! รวยแล้ว! 🎉</p>';
+                setTimeout(() => location.reload(), 3000);
+            } else if (day > 30) {
+                document.getElementById('status').innerHTML += '<p style="color: red;">⏰ หมดเวลา! ลองใหม่</p>';
+                setTimeout(() => location.reload(), 3000);
+            }
+        }
+
+        init();
+    </script>
 </body>
 </html>
